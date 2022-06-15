@@ -1,0 +1,87 @@
+;
+; windows-driver-utils-test.inf
+;
+
+[Version]
+Signature="$WINDOWS NT$"
+Class=Sample ; TODO: edit Class
+ClassGuid={78A1C341-4539-11d3-B88D-00C04FAD5171} ; TODO: edit ClassGuid
+Provider=%ManufacturerName%
+CatalogFile=windows-driver-utils-test.cat
+DriverVer= ; TODO: set DriverVer in stampinf property pages
+PnpLockDown=1
+
+[DestinationDirs]
+DefaultDestDir = 12
+windows-driver-utils-test_Device_CoInstaller_CopyFiles = 11
+
+; ================= Class section =====================
+
+[ClassInstall32]
+Addreg=SampleClassReg
+
+[SampleClassReg]
+HKR,,,0,%ClassName%
+HKR,,Icon,,-5
+
+[SourceDisksNames]
+1 = %DiskName%,,,""
+
+[SourceDisksFiles]
+windows-driver-utils-test.sys  = 1,,
+WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll=1 ; make sure the number matches with SourceDisksNames
+
+;*****************************************
+; Install Section
+;*****************************************
+
+[Manufacturer]
+%ManufacturerName%=Standard,NT$ARCH$
+
+[Standard.NT$ARCH$]
+%windows-driver-utils-test.DeviceDesc%=windows-driver-utils-test_Device, Root\windows-driver-utils-test ; TODO: edit hw-id
+
+[windows-driver-utils-test_Device.NT]
+CopyFiles=Drivers_Dir
+
+[Drivers_Dir]
+windows-driver-utils-test.sys
+
+;-------------- Service installation
+[windows-driver-utils-test_Device.NT.Services]
+AddService = windows-driver-utils-test,%SPSVCINST_ASSOCSERVICE%, windows-driver-utils-test_Service_Inst
+
+; -------------- windows-driver-utils-test driver install sections
+[windows-driver-utils-test_Service_Inst]
+DisplayName    = %windows-driver-utils-test.SVCDESC%
+ServiceType    = 1               ; SERVICE_KERNEL_DRIVER
+StartType      = 3               ; SERVICE_DEMAND_START
+ErrorControl   = 1               ; SERVICE_ERROR_NORMAL
+ServiceBinary  = %12%\windows-driver-utils-test.sys
+
+;
+;--- windows-driver-utils-test_Device Coinstaller installation ------
+;
+
+[windows-driver-utils-test_Device.NT.CoInstallers]
+AddReg=windows-driver-utils-test_Device_CoInstaller_AddReg
+CopyFiles=windows-driver-utils-test_Device_CoInstaller_CopyFiles
+
+[windows-driver-utils-test_Device_CoInstaller_AddReg]
+HKR,,CoInstallers32,0x00010000, "WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll,WdfCoInstaller"
+
+[windows-driver-utils-test_Device_CoInstaller_CopyFiles]
+WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll
+
+[windows-driver-utils-test_Device.NT.Wdf]
+KmdfService =  windows-driver-utils-test, windows-driver-utils-test_wdfsect
+[windows-driver-utils-test_wdfsect]
+KmdfLibraryVersion = $KMDFVERSION$
+
+[Strings]
+SPSVCINST_ASSOCSERVICE= 0x00000002
+ManufacturerName="<Your manufacturer name>" ;TODO: Replace with your manufacturer name
+ClassName="Samples" ; TODO: edit ClassName
+DiskName = "windows-driver-utils-test Installation Disk"
+windows-driver-utils-test.DeviceDesc = "windows-driver-utils-test Device"
+windows-driver-utils-test.SVCDESC = "windows-driver-utils-test Service"
